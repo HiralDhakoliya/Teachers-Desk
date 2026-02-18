@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generate QR - Teacher's Desk</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 30px;
+      color: #1f2937;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 18px;
+      font-size: 18px;
+      margin: 15px 0;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      background: #f9fafb;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 16px 28px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    #qrContainer {
+      margin-top: 30px;
+    }
+
+    canvas {
+      margin-top: 20px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .link-buttons {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .link-buttons a button {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📌 Generate QR Code</h2>
+
+    <input type="text" id="subject" placeholder="Enter Subject (e.g. OS, Python)" />
+    <input type="text" id="batch" placeholder="Enter Batch / Class (e.g. TYCS)" />
+    <button onclick="generateQR()">Generate QR</button>
+
+    <div id="qrContainer" style="display: none;">
+      <h3>QR Code (Valid for 40 minutes)</h3>
+      <canvas id="qr"></canvas>
+      <button onclick="downloadQR()">Download QR</button>
+
+      <div class="link-buttons" id="actionButtons" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const qr = new QRious({ element: document.getElementById("qr"), size: 280 });
+
+    function generateQR() {
+  const subject = document.getElementById("subject").value.trim();
+  const batch = document.getElementById("batch").value.trim();
+
+  if (!subject || !batch) {
+    alert("Please fill in both Subject and Batch.");
+    return;
+  }
+
+  const now = new Date();
+  const timestamp = now.getTime();
+  const sessionId = `${subject}_${batch}_${now.getDate()}_${now.getMonth()+1}_${now.getFullYear()}_${now.getHours()}-${now.getMinutes()}_${timestamp}`;
+  const expires = Date.now() + 40 * 60 * 1000;
+
+  const qrLink = `https://2fac583e6dc3.ngrok-free.app/scan.html?session=${sessionId}&expires=${expires}`;
+
+  qr.value = qrLink;
+  document.getElementById("qrContainer").style.display = "block";
+
+  const actionBox = document.getElementById("actionButtons");
+  actionBox.innerHTML = `
+    <a href="view-attendance.html?session=${sessionId}">
+      <button>📋 View Attendance</button>
+    </a>
+    <a href="dashboard.html">
+      <button>🏠 Back to Dashboard</button>
+    </a>
+  `;
+  actionBox.style.display = "flex";
+}
+
+    function downloadQR() {
+      const canvas = document.getElementById("qr");
+      const link = document.createElement("a");
+      link.download = "attendance-qr.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>

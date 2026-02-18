@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher's Desk - Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    header button {
+      background: crimson;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .welcome {
+      text-align: center;
+      font-size: 26px;
+      margin-bottom: 25px;
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 35px 25px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      min-height: 250px;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #1f2937;
+    }
+
+    .card p {
+      color: #4b5563;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .card button:hover {
+      background: #2563eb;
+    }
+
+    a button {
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Teacher's Desk</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <div class="welcome" id="welcomeMsg">Welcome, Teacher</div>
+
+  <div class="grid">
+    <div class="card">
+      <h3>📌 Attendance</h3>
+      <p>QR-based smart attendance system</p>
+      <a href="generate-qr.html">
+        <button>Start</button>
+      </a>
+    </div>
+
+    <div class="card">
+  <h3>🎓 Certificates</h3>
+  <p>Generate personalized certificate PDFs</p>
+  <a href="certificate.html">
+  <button>Generate</button>
+  </a>
+</div>
+
+    <div class="card">
+      <h3>🎒 Teaching Aids</h3>
+      <p>Smart tag-based teaching resources</p>
+      <a href="teaching-aids.html">
+      <button>Explore</button>
+      </a>
+    </div>
+
+    <div class="card">
+      <h3>🗓️ Scheduler</h3>
+      <p>Set reminders and class schedules</p>
+      <a href="scheduler.html">
+        <button>View</button>
+      </a>
+    </div>
+
+    <div class="card">
+      <h3>📋 My Schedule</h3>
+      <p>All your scheduled tasks in one place</p>
+      <a href="myschedule.html">
+        <button>View Schedule</button>
+      </a>
+    </div>
+
+    <div class="card">
+      <h3>💬 The BreakROom</h3>
+      <p>Pick your vibe: Laugh it out or Vent it out!</p>
+      <a href="breakroom.html">
+      <button>Visit</button>
+      </a>
+    </div>
+
+    
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    // Check login
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (!isLoggedIn) {
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Display userName
+    const userName = localStorage.getItem("userName");
+    const welcomeMsgElement = document.getElementById("welcomeMsg");
+    if (userName) {
+        welcomeMsgElement.innerText = `Welcome, ${userName}`;
+    } else {
+        // Clear login info if missing
+        localStorage.removeItem("isLoggedIn");
+        window.location.href = "login.html";
+        return;
+    }
+
+    // Logout function
+    window.logout = function() {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("email");
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 50);
+    }
+});
+</script>
+
+
+</body>
+</html>

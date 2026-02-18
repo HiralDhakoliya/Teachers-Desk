@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <link rel="stylesheet" href="form.css" />
+</head>
+<body>
+  <div class="container">
+    <form id="registerForm">
+      <h2>Register</h2>
+      <input type="text" id="id" placeholder="ID (4 digits)" required />
+      <input type="text" id="name" placeholder="Name" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <select id="branch" required>
+        <option value="">-- Branch --</option>
+        <option value="cs/it">CS/IT</option>
+        <option value="bcom">BCOM</option>
+        <option value="bms">BMS</option>
+        <option value="Library">Library</option>
+        <option value="staff">Staff</option>
+      </select>
+      <input type="password" id="password" placeholder="Password" required />
+      <input type="password" id="confirm" placeholder="Confirm Password" required />
+      <button type="submit">Register</button>
+      <p>Already registered? <a href="login.html">Login</a></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const id = document.getElementById("id").value.trim();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const branch = document.getElementById("branch").value;
+      const password = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm").value;
+
+      if (id.length !== 4 || isNaN(id)) return alert("ID must be 4 digits.");
+      if (!/^[a-zA-Z ]+$/.test(name)) return alert("Only letters in name.");
+      if (password !== confirm) return alert("Passwords don’t match.");
+
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, name, email, branch, password })
+      });
+
+      const msg = await res.text();
+      alert(msg);
+      if (res.ok) window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

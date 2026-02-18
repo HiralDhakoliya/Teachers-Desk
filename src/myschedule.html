@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>📅 My Schedule – Teacher's Desk</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f0ff;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    h3 {
+      text-align: center;
+      color: #555;
+      margin-bottom: 25px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #673ab7;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    #noTasks {
+      text-align: center;
+      margin-top: 30px;
+      color: gray;
+    }
+    .top-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .top-actions button {
+      padding: 10px 16px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .top-actions button.logout {
+      background: crimson;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-actions">
+    <button onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+
+  <h2>📋 My Schedule</h2>
+  <h3 id="userEmailDisplay">Loading...</h3>
+
+  <table id="taskTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Subject</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="taskBody"></tbody>
+  </table>
+
+  <p id="noTasks" style="display: none;">No tasks scheduled.</p>
+
+  <script>
+    const email = localStorage.getItem("email");
+
+    if (!email) {
+      alert("Please login first.");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("userEmailDisplay").innerText = email;
+
+      fetch(`/api/calendar-tasks-all?email=${encodeURIComponent(email)}`)
+        .then(res => res.json())
+        .then(tasks => {
+          const body = document.getElementById("taskBody");
+          const table = document.getElementById("taskTable");
+          const noTasks = document.getElementById("noTasks");
+
+          body.innerHTML = "";
+
+          if (!tasks.length) {
+            noTasks.style.display = "block";
+            table.style.display = "none";
+            return;
+          }
+
+          table.style.display = "table";
+          noTasks.style.display = "none";
+
+          tasks.forEach(task => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${task.date}</td>
+              <td>${task.subject}</td>
+              <td>${task.start}</td>
+              <td>${task.end}</td>
+              <td>${task.notes || "-"}</td>
+            `;
+            body.appendChild(row);
+          });
+        })
+        .catch(err => {
+          console.error("Failed to fetch tasks:", err);
+          document.getElementById("noTasks").innerText = "Error loading tasks.";
+          document.getElementById("noTasks").style.display = "block";
+        });
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+  </script>
+
+</body>
+</html>

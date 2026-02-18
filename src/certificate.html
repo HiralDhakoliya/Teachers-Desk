@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Certificate Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f2f6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #4a00e0;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #message {
+      margin-top: 1rem;
+    }
+    .top-right-link {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  text-decoration: none;
+  color: #151e93;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+  </style>
+</head>
+<body>
+    <div class="container">
+    <!-- 🔰 Header -->
+    <div class="page-header">
+      <h2>🎓 Certificate Generator</h2>
+      <div class="links">
+       <a href="dashboard.html" class="top-right-link">🏠 Dashboard</a>
+
+    </div>
+
+  <div class="card">
+    <h2>🎓 Certificate Generator</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Upload Template (HTML)</label><br/>
+      <input type="file" name="template" required/><br/>
+      <label>Upload Student Data (Excel)</label><br/>
+      <input type="file" name="excel" required/><br/>
+      <button type="submit">Generate Certificates</button>
+    </form>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.innerText = "⏳ Generating certificates...";
+      const formData = new FormData(form);
+
+      const res = await fetch('/generate-certificates', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'certificates.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        message.innerText = "✅ Certificates Generated!";
+      } else {
+        message.innerText = "❌ Error generating certificates.";
+      }
+    });
+  </script>
+</body>
+</html>

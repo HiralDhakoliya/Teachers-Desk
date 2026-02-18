@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mark Attendance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f6fa;
+      padding: 30px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
+    button {
+      width: 100%;
+      margin-top: 30px;
+      padding: 12px;
+      background: #38ada9;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .msg {
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🟢 Mark Attendance</h1>
+
+    <label>Name</label>
+    <input type="text" id="name" placeholder="Enter your name" />
+
+    <label>Roll Number</label>
+    <input type="text" id="roll" placeholder="Enter your roll no." />
+
+    <button onclick="submitAttendance()">Submit</button>
+
+    <p class="msg" id="msgBox"></p>
+  </div>
+
+  <script>
+    const sessionId = new URLSearchParams(window.location.search).get("session");
+
+    function submitAttendance() {
+      const name = document.getElementById("name").value;
+      const roll = document.getElementById("roll").value;
+      const msgBox = document.getElementById("msgBox");
+
+      if (!name || !roll) {
+        msgBox.textContent = "Please fill all fields.";
+        msgBox.style.color = "red";
+        return;
+      }
+
+      fetch("/api/mark-attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, roll, sessionId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          msgBox.textContent = "✅ Attendance marked successfully!";
+          msgBox.style.color = "green";
+        } else if (data.message === "QR expired. Attendance not allowed.") {
+          msgBox.textContent = "❌ QR Code has expired. Attendance not allowed.";
+          msgBox.style.color = "red";
+        } else {
+          msgBox.textContent = "❌ Failed to mark attendance.";
+          msgBox.style.color = "red";
+        }
+      })
+      .catch(err => {
+        msgBox.textContent = "⚠️ Server error.";
+        msgBox.style.color = "red";
+      });
+    }
+  </script>
+</body>
+</html>

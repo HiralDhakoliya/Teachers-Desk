@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Teaching Aids</title>
+  <link rel="stylesheet" href="form.css" />
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      background: linear-gradient(to right, #8e2de2, #4a00e0);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+
+    .page-header h2 {
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .page-header .links a {
+      text-decoration: none;
+      margin-left: 1.5rem;
+      font-size: 1.1rem;
+      color: #3498db;
+      font-weight: 500;
+    }
+
+    .page-header .links a:hover {
+      color: #21618c;
+    }
+
+    label {
+      display: block;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      font-size: 1.1rem;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2c80b4;
+    }
+
+    #results {
+      margin-top: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-top: 3.5rem;
+      margin-bottom: 1rem;
+      color: #2c3e50;
+    }
+
+    .resource, .material-card {
+      background-color: #f8f9ff;
+      border-left: 6px solid #3498db;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .resource h4, .material-title {
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+
+    .tag {
+      background-color: #d0e7ff;
+      color: #003f7f;
+      font-size: 0.95rem;
+      padding: 6px 12px;
+      margin: 4px 6px 0 0;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .official { color: green; font-weight: bold; }
+    .uploaded { color: #e67e22; font-weight: bold; }
+
+    .material-meta {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .material-actions a {
+      margin-right: 15px;
+      text-decoration: none;
+      font-size: 0.95rem;
+      color: #007bff;
+    }
+
+    .material-actions a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- 🔰 Header -->
+    <div class="page-header">
+      <h2>🔍 Teaching Aids</h2>
+      <div class="links">
+        <a href="dashboard.html">🏠 Dashboard</a>
+        <a href="upload-resource.html">⬆️ Upload Aid</a>
+      </div>
+    </div>
+
+    <!-- 🔎 Filters -->
+    <label>Department:</label>
+    <select id="deptFilter">
+      <option value="">All Departments</option>
+      <option value="B.Com">B.Com</option>
+      <option value="BMS">BMS</option>
+      <option value="BSc CS">BSc CS</option>
+      <option value="BSc IT">BSc IT</option>
+    </select>
+
+    <label>Tags:</label>
+    <input type="text" id="tagInput" placeholder="e.g., oop, networking" />
+
+    <button onclick="fetchResources()">🔍 Search</button>
+
+    <!-- 📦 Search Results -->
+    <div id="results" class="search-results"></div>
+
+    <!-- 📚 Fixed Existing Materials -->
+    <h3 class="section-title">📚 BSc CS – Previous Year Question Papers (Sem 5 – 2023–24)</h3>
+    <div id="materialList"></div>
+  </div>
+
+  <!-- 🔧 JS Logic -->
+  <script>
+    async function fetchResources() {
+      const dept = document.getElementById("deptFilter").value;
+      const tags = document.getElementById("tagInput").value.trim().toLowerCase().split(',').map(t => t.trim());
+
+      const res = await fetch(`/get-resources?dept=${encodeURIComponent(dept)}&tags=${encodeURIComponent(tags.join(','))}`);
+      const data = await res.json();
+
+      const container = document.getElementById("results");
+      container.innerHTML = "";
+
+      if (data.length === 0) {
+        container.innerHTML = "<p style='font-size: 1.2rem;'>❌ No matching resources found.</p>";
+        return;
+      }
+
+      data.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "resource";
+        div.innerHTML = `
+          <h4>${r.title}</h4>
+          <p><strong>Dept:</strong> ${r.department} | 
+          <span class="${r.type === 'official' ? 'official' : 'uploaded'}">${r.type === 'official' ? '✅ Official' : '👤 Uploaded'}</span></p>
+          <p><strong>By:</strong> ${r.uploaded_by || "System"}</p>
+          <p><strong>Link:</strong> <a href="${r.link}" target="_blank">${r.link}</a></p>
+          <p>${r.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 📚 Load Static Existing Materials
+    const existingMaterials = [
+      {
+        title: "Artificial Intelligence – PYQ (Sem 5 – 2023–24)",
+        stream: "BSc CS",
+        category: "Previous Year Question Papers",
+        fileUrl: "/uploads/ARTIFICIAL INTELLIGENCE QP 23-24.pdf"
+      },
+      {
+        title: "Game Programming – PYQ (Sem 5 – 2023–24)",
+        stream: "BSc CS",
+        category: "Previous Year Question Papers",
+        fileUrl: "/uploads/GAME PROGRAMMING QP 23-24.pdf"
+      },
+      {
+        title: "Information & Network Security – PYQ (Sem 5 – 2023–24)",
+        stream: "BSc CS",
+        category: "Previous Year Question Papers",
+        fileUrl: "/uploads/INFORMATION & NETWORK SECURITY QP 23-24.pdf"
+      },
+      {
+        title: "Project Management – PYQ (Sem 5 – 2023–24)",
+        stream: "BSc CS",
+        category: "Previous Year Question Papers",
+        fileUrl: "/uploads/PROJECT MANAGEMENT QP 23-24.pdf"
+      },
+      {
+        title: "Software Testing & Quality Assurance – PYQ (Sem 5 – 2023–24)",
+        stream: "BSc CS",
+        category: "Previous Year Question Papers",
+        fileUrl: "/uploads/SOFTWARE TESTING & QUALITY ASSURANCE QP 23-24.pdf"
+      }
+    ];
+
+    const materialList = document.getElementById("materialList");
+
+    existingMaterials.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "material-card";
+
+      card.innerHTML = `
+        <div class="material-title">${item.title}</div>
+        <div class="material-meta">${item.stream} • ${item.category}</div>
+        <div class="material-actions">
+          <a href="${item.fileUrl}" target="_blank">View</a>
+          <a href="${item.fileUrl}" download>Download</a>
+        </div>
+      `;
+
+      materialList.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>

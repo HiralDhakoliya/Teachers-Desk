@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Teaching Resource</title>
+  <link rel="stylesheet" href="form.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #8360c3, #2ebf91);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      padding: 30px 40px;
+      max-width: 450px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4A63E7;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #4A63E7;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3a4dcc;
+    }
+
+    #msg {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    #msg.success { color: green; }
+    #msg.error { color: red; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📤 Upload Teaching Aid</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Title:</label>
+      <input type="text" name="title" required />
+
+      <label>Department:</label>
+      <select name="department" required>
+        <option value="">-- Select --</option>
+        <option value="B.Com">B.Com</option>
+        <option value="BMS">BMS</option>
+        <option value="BSc CS">BSc CS</option>
+        <option value="BSc IT">BSc IT</option>
+      </select>
+
+      <label>Tags (comma separated):</label>
+      <input type="text" name="tags" placeholder="e.g., oop, pdf, java" required />
+
+      <label>Resource Link (Google Drive/YouTube):</label>
+      <input type="url" name="link" placeholder="https://..." />
+
+      <label>Or Upload PDF:</label>
+      <input type="file" name="pdfFile" accept="application/pdf" />
+
+      <label>Uploaded By:</label>
+      <input type="text" name="uploaded_by" placeholder="Your Name" required />
+
+      <button type="submit">Upload</button>
+    </form>
+    <p id="msg"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = "";
+      msg.textContent = "⏳ Uploading...";
+
+      const formData = new FormData(form);
+      const tags = formData.get("tags").split(",").map(tag => tag.trim().toLowerCase());
+
+      const hasFile = formData.get("pdfFile") && formData.get("pdfFile").size > 0;
+      const hasLink = formData.get("link").trim() !== "";
+
+      if (!hasFile && !hasLink) {
+        msg.textContent = "❌ Please provide either a resource link or upload a PDF.";
+        msg.className = "error";
+        return;
+      }
+
+      // Process tags and metadata
+      formData.set("tags", JSON.stringify(tags));
+      formData.set("uploaded_on", new Date().toISOString());
+      formData.set("type", "uploaded");
+
+      try {
+        const res = await fetch('/upload-resource', {
+          method: "POST",
+          body: formData
+        });
+
+        if (res.ok) {
+          msg.textContent = "✅ Resource uploaded successfully!";
+          msg.className = "success";
+          form.reset();
+        } else {
+          msg.textContent = "❌ Upload failed. Try again.";
+          msg.className = "error";
+        }
+      } catch (err) {
+        msg.textContent = "❌ Server error.";
+        msg.className = "error";
+      }
+    });
+  </script>
+</body>
+</html>
